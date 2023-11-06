@@ -26,3 +26,23 @@ func (s readonlySlice[V]) Len() int {
 func (s readonlySlice[V]) Get(index int) V {
 	return s[index]
 }
+
+// CopySlice makes a copy of the given ReadonlySlice that owns its own data so changes to the
+// original underlying slice wont affect the new ReadonlySlice's content.
+func CopySlice[V any](s ReadonlySlice[V]) ReadonlySlice[V] {
+	return NewReadonlySlice(CopySliceMut(s))
+}
+
+// CopySliceMut copies the contents of the given ReadonlySlice into a new slice.
+func CopySliceMut[V any](s ReadonlySlice[V]) []V {
+	l := s.Len()
+	c := make([]V, l)
+	if s, ok := s.(readonlySlice[V]); ok {
+		copy(c, s)
+		return c
+	}
+	for i := 0; i < l; i++ {
+		c[i] = s.Get(i)
+	}
+	return c
+}
